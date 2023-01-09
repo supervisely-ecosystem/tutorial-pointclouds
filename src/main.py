@@ -49,15 +49,17 @@ print("Batch uploading has finihed:", result)
 
 # Get point cloud info by name
 pcd_info = api.pointcloud.get_info_by_name(dataset.id, name="pcd_0")
+print("Get point cloud info:")
 print(pcd_info)
 
 # Get point cloud info by id
 pcd_info = api.pointcloud.get_info_by_id(pcd_info.id)
 print("Point cloud name:", pcd_info.name)
 
-# Get image context info
+# Get context image info
 img_infos = api.pointcloud.get_list_related_images(pcd_info.id)
 img_info = img_infos[0]
+print("Get context image info:")
 print(img_info)
 
 # Get list of all point clouds in the dataset
