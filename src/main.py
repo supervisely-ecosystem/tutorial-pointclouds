@@ -29,11 +29,12 @@ pcd_file = "src/input/pcd/000000.pcd"
 pcd_info = api.pointcloud.upload_path(dataset.id, name="pcd_0", path=pcd_file)
 print(f'Point cloud "{pcd_info.name}" uploaded to Supervisely with ID:{pcd_info.id}')
 
-# Upload related context image to Supervisely.
+# Upload a related context image to Supervisely.
 img_file = "src/input/img/000000.png"
 img_hash = api.pointcloud.upload_related_image(img_file)
 img_info = {"entityId": pcd_info.id, "name": "img0", "hash": img_hash}
-api.pointcloud.add_related_images([img_info])
+result = api.pointcloud.add_related_images([img_info])
+print("Context image has been uploaded.", result)
 
 
 # Upload batch
@@ -73,7 +74,7 @@ print(f"Point cloud has been successfully downloaded to '{save_path}'")
 save_path = "src/output/img_0.png"
 img_info = api.pointcloud.get_list_related_images(pcd_info.id)[0]
 api.pointcloud.download_related_image(img_info["id"], save_path)
-print(f"Image context has been successfully downloaded to '{save_path}'")
+print(f"Context image has been successfully downloaded to '{save_path}'")
 
 
 # Update meta

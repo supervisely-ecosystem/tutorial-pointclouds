@@ -7,8 +7,8 @@ In this tutorial we will focus on working with Point Clouds using Supervisely SD
 You will learn how to:
 
 1. [Upload point clouds from local directory to Supervisely](#Upload-point-clouds-from-local-directory-to-Supervisely)
-2. [Get information about Point Clouds and image contexts](#Get-information-about-Point-Clouds-and-image-contexts)
-3. [Download point clouds and image contexts to local directory](#Download-point-clouds-and-image-contexts-to-local-directory)
+2. [Get information about Point Clouds and image contexts](#Get-information-about-Point-Clouds-and-related-context-Images)
+3. [Download point clouds and image contexts to local directory](#Download-point-clouds-and-context-images-from-Supervisely)
 6. [get and update image metadata](#get-and-update-image-metadata)
 7. [remove images from Supervisely.](#remove-images-from-supervisely)
 
@@ -124,7 +124,7 @@ print(f'Point cloud "{pcd_info.name}" uploaded to Supervisely with ID:{pcd_info.
 
 <figure><img src="https://user-images.githubusercontent.com/79905215/209367792-2bd43e87-453f-4cba-9f41-9648a964658d.png" alt=""><figcaption></figcaption></figure>
 
-### Upload context image to Supervisely.
+### Upload a related context image to Supervisely.
 
 **Source code:**
 
@@ -133,16 +133,16 @@ img_file = "src/input/img/000000.png"
 img_hash = api.pointcloud.upload_related_image(img_file)
 img_info = {"entityId": pcd_info.id, "name": "img0", "hash": img_hash}
 result = api.pointcloud.add_related_images([img_info])
-print("Image context has uploaded.", result)
+print("Context image has been uploaded.", result)
 ```
 
 **Output:**
 
 ```python
-# Image context has uploaded. {'success': True}
+# Context image has been uploaded. {'success': True}
 ```
 
-### Upload list of point clouds and iamge contexts.
+### Upload list of point clouds and context iamges.
 
 ✅ Supervisely API allows uploading multiple point clouds in a single request. The code sample below sends fewer requests and it leads to a significant speed-up of our original code.
 
@@ -168,9 +168,9 @@ print("Batch uploading has finihed:", result)
 <figure><img src="https://user-images.githubusercontent.com/79905215/209367771-ff6d5852-f153-4529-9092-f58bcb45a3cc.png" alt=""><figcaption></figcaption></figure>
 
 
-## Get information about Point Clouds and image contexts
+## Get information about Point Clouds and related context Images
 
-### By point cloud's name
+### Get info by name
 
 Get information about point cloud from Supervisely by name.
 
@@ -206,7 +206,7 @@ PointcloudInfo(
 )
 ```
 
-### By point cloud's ID
+### Get info by ID
 
 You can also get information about image from Supervisely by id.
 
@@ -214,18 +214,18 @@ You can also get information about image from Supervisely by id.
 
 ```python
 pcd_info = api.pointcloud.get_info_by_id(pcd_info.id)
-print("Point cloud name -", pcd_info.name)
+print("Point cloud name:", pcd_info.name)
 ```
 
 **Output:**
 
 ```python
-# Point cloud name - pcd_0
+# Point cloud name: pcd_0
 ```
 
-### Get information about image contexts
+### Get information about context images
 
-Get information about related image contexts, for example it can be a photo from front/back cameras of vehicle.
+Get information about related context images. For example it can be a photo from front/back cameras of a vehicle.
 
 **Source code:**
 
@@ -274,7 +274,7 @@ print(f"Dataset contains {len(pcd_infos)} point clouds")
 ```
 
 
-## Download point clouds and image contexts to local directory
+## Download point clouds and context images from Supervisely
 
 ### Single point cloud
 
@@ -294,9 +294,9 @@ print(f"Point cloud has been successfully downloaded to '{save_path}'")
 # Point cloud has been successfully downloaded to 'src/output/pcd_0.pcd'
 ```
 
-### Single related image context
+### Single related context image
 
-Download a related image context from Supervisely to local directory by image id.
+Download a related context image from Supervisely to local directory by image id.
 
 **Source code:**
 
@@ -304,11 +304,11 @@ Download a related image context from Supervisely to local directory by image id
 save_path = "src/output/img_0.png"
 img_info = api.pointcloud.get_list_related_images(pcd_info.id)[0]
 api.pointcloud.download_related_image(img_info["id"], save_path)
-print(f"Image context has been successfully downloaded to '{save_path}'")
+print(f"Context image has been successfully downloaded to '{save_path}'")
 ```
 
 **Output:**
 
 ```python
-# Image context has been successfully downloaded to 'src/output/img_0.png'
+# Context image has been successfully downloaded to 'src/output/img_0.png'
 ```
