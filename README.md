@@ -123,12 +123,16 @@ print(f'Point cloud "{pcd_info.name}" uploaded to Supervisely with ID:{pcd_info.
 # Point cloud "pcd_0" uploaded to Supervisely platform with ID:17539453
 ```
 
-<figure><img src="https://user-images.githubusercontent.com/79905215/209367792-2bd43e87-453f-4cba-9f41-9648a964658d.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://user-images.githubusercontent.com/31512713/211832231-81103088-7062-46c2-b93e-99241be3d28f.png" alt="first-pcd-uploaded"><figcaption></figcaption></figure>
+
+**Now you can explore and label it in [Supervisely labeling tool](https://ecosystem.supervise.ly/annotation_tools/pointcloud-labeling-tool)**:
+
+<figure><img src="https://user-images.githubusercontent.com/31512713/211832212-73569ed7-d77f-4519-bd63-e02de63e4f18.png" alt="first-in-labeling-tool"><figcaption></figcaption></figure>
 
 ### Upload related context image to Supervisely.
 
-If you have a photo context taken with a LIDAR point cloud, you can attach the photo to the point cloud.
-To do that, we need two matrices for binding coordinates in the point cloud to pixels in the photo.
+If you have a photo context taken with a LIDAR image, you can attach the photo to the point cloud.
+To do that, we need two additional matrices. They are taking part in binding coordinates in the point cloud to pixels in the photo.
 In this tutorial we already have them in a json file. For each image we have a one json like this:
 ```python
 {
@@ -179,6 +183,8 @@ print("Context image has been uploaded.")
 # Context image has been uploaded. {'success': True}
 ```
 
+<figure><img src="https://user-images.githubusercontent.com/31512713/211832224-a8369237-3e42-4437-9bbb-7b4cb6cda167.png" alt="first-in-labeling-tool-context"><figcaption></figcaption></figure>
+
 ### Upload list of point clouds and context images.
 
 ✅ Supervisely API allows uploading multiple point clouds in a single request. The code sample below sends fewer requests and it leads to a significant speed-up of our original code.
@@ -210,8 +216,6 @@ print("Batch uploading has finished:", result)
 ```python
 # Batch uploading has finished: {'success': True}
 ```
-
-<figure><img src="https://user-images.githubusercontent.com/79905215/209367771-ff6d5852-f153-4529-9092-f58bcb45a3cc.png" alt=""><figcaption></figcaption></figure>
 
 
 ## Get information about Point Clouds and related context Images
@@ -455,3 +459,7 @@ print("Point Clouds Episode has been uploaded to Supervisely")
 ```python
 # Point Clouds Episode has been uploaded to Supervisely
 ```
+
+**Now you can explore and label it in [Supervisely labeling tool for Episodes](https://ecosystem.supervise.ly/annotation_tools/pointcloud-episodes-labeling-tool)**:
+
+<figure><img src="https://user-images.githubusercontent.com/31512713/211832234-115e1280-e3b7-4b3f-80e2-1b17a3868a76.png" alt="episodes"><figcaption></figcaption></figure>
