@@ -6,11 +6,10 @@ In this tutorial we will focus on working with Point Clouds using Supervisely SD
 
 You will learn how to:
 
-1. [Upload point clouds from local directory to Supervisely](#Upload-point-clouds-from-local-directory-to-Supervisely)
+1. [Upload point clouds and photo context to Supervisely](#Upload-point-clouds-and-photo-context-to-Supervisely)
 2. [Get information about Point Clouds and image contexts](#Get-information-about-Point-Clouds-and-related-context-Images)
 3. [Download point clouds and image contexts to local directory](#Download-point-clouds-and-context-images-from-Supervisely)
-6. [get and update image metadata](#get-and-update-image-metadata)
-7. [remove images from Supervisely.](#remove-images-from-supervisely)
+4. [Working with Point Cloud Episodes](#Working-with-Point-Cloud-Episodes)
 
 📗 Everything you need to reproduce [this tutorial is on GitHub](https://github.com/supervisely-ecosystem/tutorial-pointclouds): source code and demo data.
 
@@ -48,6 +47,8 @@ context.workspaceId=654 # ⬅️ change value
 
 ```python
 import os
+import json
+from pathlib import Path
 from dotenv import load_dotenv
 import supervisely as sly
 ```
@@ -85,7 +86,7 @@ print(f"Project ID: {project.id}")
 **Output:**
 
 ```python
-# Project ID: 15599
+# Project ID: 16197
 ```
 
 Create new dataset.
@@ -101,10 +102,10 @@ print(f"Dataset ID: {dataset.id}")
 **Output:**
 
 ```python
-# Dataset ID: 53465
+# Dataset ID: 54539
 ```
 
-## Upload point clouds from local directory to Supervisely
+## Upload point clouds and photo context to Supervisely
 
 ### Upload single point cloud.
 
@@ -124,16 +125,52 @@ print(f'Point cloud "{pcd_info.name}" uploaded to Supervisely with ID:{pcd_info.
 
 <figure><img src="https://user-images.githubusercontent.com/79905215/209367792-2bd43e87-453f-4cba-9f41-9648a964658d.png" alt=""><figcaption></figcaption></figure>
 
-### Upload a related context image to Supervisely.
+### Upload related context image to Supervisely.
+
+If you have a photo context taken with a LIDAR point cloud, you can attach the photo to the point cloud.
+To do that, we need two matrices for binding coordinates in the point cloud to pixels in the photo.
+In this tutorial we already have them in a json file. For each image we have a one json like this:
+```python
+{
+    "extrinsicMatrix": [
+        0.007533745,
+        -0.9999714,
+        -0.000616602,
+        -0.004069766,
+        0.01480249,
+        0.0007280733,
+        -0.9998902,
+        -0.07631618,
+        0.9998621,
+        0.00752379,
+        0.01480755,
+        -0.2717806,
+    ],
+    "intrinsicMatrix": [721.5377, 0, 609.5593, 0, 721.5377, 172.854, 0, 0, 1],
+}
+```
+For further reading about transformations see [OpenCV docs for 3D reconstruction](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html).
 
 **Source code:**
 
 ```python
+# input files:
 img_file = "src/input/img/000000.png"
+cam_info_file = "src/input/cam_info/000000.json"
+
+# cam_info contains two matrices needed for projecting points in a 3D space to 2D context photo.
+with open(cam_info_file, "r") as f:
+    cam_info = json.load(f)
+
+# 1. upload an image. It returns a hash
 img_hash = api.pointcloud.upload_related_image(img_file)
-img_info = {"entityId": pcd_info.id, "name": "img0", "hash": img_hash}
-result = api.pointcloud.add_related_images([img_info])
-print("Context image has been uploaded.", result)
+# 2. create meta with two matrices
+meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
+# 3. create img_info, it needed to attach the image to the point cloud by its id
+img_info = {"entityId": pcd_info.id, "name": "img_0", "hash": img_hash, "meta": meta}
+# 4. run api command to add the image
+api.pointcloud.add_related_images([img_info])
+print("Context image has been uploaded.")
 ```
 
 **Output:**
@@ -142,27 +179,36 @@ print("Context image has been uploaded.", result)
 # Context image has been uploaded. {'success': True}
 ```
 
-### Upload list of point clouds and context iamges.
+### Upload list of point clouds and context images.
 
 ✅ Supervisely API allows uploading multiple point clouds in a single request. The code sample below sends fewer requests and it leads to a significant speed-up of our original code.
 
 **Source code:**
 
 ```python
+# Upload batch
 paths = ["src/input/pcd/000001.pcd", "src/input/pcd/000002.pcd"]
 img_paths = ["src/input/img/000001.png", "src/input/img/000002.png"]
+cam_paths = ["src/input/cam_info/000001.json", "src/input/cam_info/000002.json"]
 
 pcd_infos = api.pointcloud.upload_paths(dataset.id, names=["pcd_1", "pcd_2"], paths=paths)
 img_hashes = api.pointcloud.upload_related_images(img_paths)
-img_infos = [{"entityId": pcd_infos[i].id, "name": f"img{i}", "hash": img_hashes[i]} for i in range(len(img_paths))]
+img_infos = []
+for i, cam_info_file in enumerate(cam_paths):
+    # collecting img_infos
+    with open(cam_info_file, "r") as f:
+        cam_info = json.load(f)
+    meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
+    img_info = {"entityId": pcd_infos[i].id, "name": f"img_{i}", "hash": img_hashes[i], "meta": meta}
+    img_infos.append(img_info)
 result = api.pointcloud.add_related_images(img_infos)
-print("Batch uploading has finihed:", result)
+print("Batch uploading has finished:", result)
 ```
 
 **Output:**
 
 ```python
-# Batch uploading has finihed: {'success': True}
+# Batch uploading has finished: {'success': True}
 ```
 
 <figure><img src="https://user-images.githubusercontent.com/79905215/209367771-ff6d5852-f153-4529-9092-f58bcb45a3cc.png" alt=""><figcaption></figcaption></figure>
@@ -256,7 +302,7 @@ print(img_info)
 ```
 
 
-### Get list of all point clouds in the dataset.
+### Get list of all point clouds in the dataset
 
 You can list all point clouds in the dataset.
 
@@ -270,7 +316,7 @@ print(f"Dataset contains {len(pcd_infos)} point clouds")
 **Output:**
 
 ```python
-# The dataset contains 3 point clouds
+# Dataset contains 3 point clouds
 ```
 
 
@@ -311,4 +357,101 @@ print(f"Context image has been successfully downloaded to '{save_path}'")
 
 ```python
 # Context image has been successfully downloaded to 'src/output/img_0.png'
+```
+
+------
+
+## Working with Point Cloud Episodes
+
+Working with Point Cloud Episodes is similar, except the following:
+1. There is `api.pointcloud_episode` for working with episodes.
+2. Create a dataset with the type `sly.ProjectType.POINT_CLOUD_EPISODES`.
+3. Put the frame index in meta while uploading a pcd: `meta = {"frame": idx}`.
+
+### Create new project and dataset
+
+Create new project.
+
+**Source code:**
+
+```python
+project = api.project.create(workspace_id, "Point Cloud Episodes Tutorial", type=sly.ProjectType.POINT_CLOUD_EPISODES, change_name_if_conflict=True)
+print(f"Project ID: {project.id}")
+```
+
+**Output:**
+
+```python
+# Project ID: 16197
+```
+
+Create new dataset.
+
+**Source code:**
+
+```python
+dataset = api.dataset.create(project.id, "dataset_1")
+print(f"Dataset ID: {dataset.id}")
+```
+
+**Output:**
+
+```python
+# Dataset ID: 54539
+```
+
+### Upload one point cloud to Supervisely.
+
+**Source code:**
+
+```python
+meta = {"frame": 0}  # "frame" is a required field for Episodes
+pcd_info = api.pointcloud_episode.upload_path(dataset.id, "pcd_0", "src/input/pcd/000000.pcd", meta=meta)
+print(f'Point cloud "{pcd_info.name}" (frame={meta["frame"]}) uploaded to Supervisely')
+```
+
+**Output:**
+
+```python
+# Point cloud "pcd_0" (frame=0) uploaded to Supervisely
+```
+
+### Upload entire point clouds episode to Supervisely platform.
+
+**Source code:**
+
+```python
+# method for reading json cam_info matrices:
+def collect_img_meta(cam_info_file):
+    with open(cam_info_file, "r") as f:
+        cam_info = json.load(f)
+    img_meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
+    return img_meta
+
+
+# 1. get paths
+input_path = "src/input"
+pcd_files = list(Path(f"{input_path}/pcd").glob("*.pcd"))
+img_files = list(Path(f"{input_path}/img").glob("*.png"))
+cam_info_files = Path(f"{input_path}/cam_info").glob("*.json")
+
+# 2. get names and metas
+pcd_metas = [{"frame": i} for i in range(len(pcd_files))]
+img_metas = [collect_img_meta(cam_info_file) for cam_info_file in cam_info_files]
+pcd_names = list(map(os.path.basename, pcd_files))
+img_names = list(map(os.path.basename, img_files))
+
+# 3. upload
+pcd_infos = api.pointcloud_episode.upload_paths(dataset.id, pcd_names, pcd_files, metas=pcd_metas)
+img_hashes = api.pointcloud.upload_related_images(img_files)
+img_infos = [{"entityId": pcd_infos[i].id, "name": img_names[i], "hash": img_hashes[i], "meta": img_metas[i]} for i in range(len(img_hashes))]
+api.pointcloud.add_related_images(img_infos)
+
+print("Point Clouds Episode has been uploaded to Supervisely")
+```
+
+**Output:**
+
+```python
+# Point Clouds Episode has been uploaded to Supervisely
 ```
