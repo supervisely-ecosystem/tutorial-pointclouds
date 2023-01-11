@@ -1,8 +1,8 @@
-# Basic operations with Point Clouds
+# Working with 3D Point Clouds and Point Cloud Episodes
 
 ## Introduction
 
-In this tutorial we will focus on working with Point Clouds using Supervisely SDK.
+In this tutorial we will focus on working with Point Clouds and Point Cloud Episodes using Supervisely SDK.
 
 You will learn how to:
 
