@@ -131,10 +131,13 @@ print(f'Point cloud "{pcd_info.name}" uploaded to Supervisely with ID:{pcd_info.
 
 ### Upload related context image to Supervisely.
 
+#### Extrinsic and intrinsic matrices
+
 If you have a photo context taken with a LIDAR image, you can attach the photo to the point cloud.
 To do that, we need two additional matrices. They are taking part in binding coordinates in the point cloud to pixels in the photo.
-In this tutorial we already have them in a json file. For each image we have a one json like this:
+In this tutorial we already have them in a json format. For each image we have a one json like this:
 ```python
+# src/cam_info/000000.json
 {
     "extrinsicMatrix": [
         0.007533745,
@@ -153,7 +156,23 @@ In this tutorial we already have them in a json file. For each image we have a o
     "intrinsicMatrix": [721.5377, 0, 609.5593, 0, 721.5377, 172.854, 0, 0, 1],
 }
 ```
-For further reading about transformations see [OpenCV docs for 3D reconstruction](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html).
+The matrices are flattened and correspond to the two below from the [OpenCV 3D calibration tutorial](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html):
+
+![matrices_labeled](https://user-images.githubusercontent.com/31512713/212629303-209af3f0-49fc-4a73-9125-233d616cd583.png)
+
+**What do these parameters mean?**
+
+- **f<sub>x</sub>, f<sub>y</sub>** are the focal lengths expressed in pixel units
+- **c<sub>x</sub>, c<sub>y</sub>** is a principal point that is usually at the image center
+- **r<sub>ij</sub>** and **t<sub>i</sub>** from extrinsicMatrix are the rotation and translation parameters
+
+The dot product of the matrices and XYZ coordinate in 3D space gives us the coordinate of a point (x=u,y=v) in the context photo:
+
+![image](https://user-images.githubusercontent.com/31512713/212630179-13315291-0e69-4099-a6ae-824da3e4598e.png)
+
+For further reading about the transformations see [OpenCV tutorial](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html).
+
+#### Uploading a context photo to the Supervisely.
 
 **Source code:**
 
