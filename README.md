@@ -350,7 +350,7 @@ print(f"Dataset contains {len(pcd_infos)} point clouds")
 
 ## Download point clouds and context images from Supervisely
 
-### Single point cloud
+### Download a point cloud
 
 Download point cloud from Supervisely to local directory by id.
 
@@ -368,7 +368,7 @@ print(f"Point cloud has been successfully downloaded to '{save_path}'")
 # Point cloud has been successfully downloaded to 'src/output/pcd_0.pcd'
 ```
 
-### Single related context image
+### Download a related context image
 
 Download a related context image from Supervisely to local directory by image id.
 
