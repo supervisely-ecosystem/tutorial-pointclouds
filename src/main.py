@@ -39,20 +39,25 @@ print(f'Point cloud "{pcd_info.name}" uploaded to Supervisely with ID:{pcd_info.
 
 
 # Upload related context image to Supervisely.
+# input files:
 img_file = "src/input/img/000000.png"
 cam_info_file = "src/input/cam_info/000000.json"
 
+# 0. Read cam_info with matrices (meta dict).
 with open(cam_info_file, "r") as f:
     cam_info = json.load(f)
 
+# 1. Upload an image to the Supervisely. It generates us a hash for image
 img_hash = api.pointcloud.upload_related_image(img_file)
-meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
-img_info = {"entityId": pcd_info.id, "name": "img_0", "hash": img_hash, "meta": meta}
+# 2. Create img_info needed for matching the image to the point cloud by its ID
+img_info = {"entityId": pcd_info.id, "name": "img_0", "hash": img_hash, "meta": cam_info}
+# 3. Run the API command to attach the image
 api.pointcloud.add_related_images([img_info])
+
 print("Context image has been uploaded.")
 
 
-# Upload batch
+# Upload a batch of point clouds and related images
 paths = ["src/input/pcd/000001.pcd", "src/input/pcd/000002.pcd"]
 img_paths = ["src/input/img/000001.png", "src/input/img/000002.png"]
 cam_paths = ["src/input/cam_info/000001.json", "src/input/cam_info/000002.json"]
@@ -61,15 +66,14 @@ pcd_infos = api.pointcloud.upload_paths(dataset.id, names=["pcd_1", "pcd_2"], pa
 img_hashes = api.pointcloud.upload_related_images(img_paths)
 img_infos = []
 for i, cam_info_file in enumerate(cam_paths):
-    # collecting img_infos
+    # reading cam_info
     with open(cam_info_file, "r") as f:
         cam_info = json.load(f)
-    meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
     img_info = {
         "entityId": pcd_infos[i].id,
         "name": f"img_{i}",
         "hash": img_hashes[i],
-        "meta": meta,
+        "meta": cam_info,
     }
     img_infos.append(img_info)
 result = api.pointcloud.add_related_images(img_infos)
@@ -131,11 +135,10 @@ print(f"Dataset ID: {dataset.id}")
 
 
 # Upload entire point clouds episode to Supervisely platform.
-def collect_img_meta(cam_info_file):
+def read_cam_info(cam_info_file):
     with open(cam_info_file, "r") as f:
         cam_info = json.load(f)
-    img_meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
-    return img_meta
+    return cam_info
 
 
 # 1. get paths
@@ -146,7 +149,7 @@ cam_info_files = Path(f"{input_path}/cam_info").glob("*.json")
 
 # 2. get names and metas
 pcd_metas = [{"frame": i} for i in range(len(pcd_files))]
-img_metas = [collect_img_meta(cam_info_file) for cam_info_file in cam_info_files]
+img_metas = [read_cam_info(cam_info_file) for cam_info_file in cam_info_files]
 pcd_names = list(map(os.path.basename, pcd_files))
 img_names = list(map(os.path.basename, img_files))
 

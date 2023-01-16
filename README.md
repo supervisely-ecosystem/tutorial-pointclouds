@@ -150,29 +150,36 @@ The dot product of the matrices and XYZ coordinate in 3D space gives us the coor
 <figure><img src="https://user-images.githubusercontent.com/31512713/212630179-13315291-0e69-4099-a6ae-824da3e4598e.png" alt="dot_product_matrices", width="300px"><figcaption></figcaption></figure>
 
 #### Uploading context photo to the Supervisely.
-For attaching a photo, it is needed to provide the matrices in a `meta` field when adding the related image to the Supervisely.
-The matrices must be **flattened** lists and named like in the example below:
+For attaching a photo, it is needed to provide the matrices in a `meta` **dict** with the `deviceId` and `sensorsData` fields.
+The matrices must be included in the `meta` dict as **flattened** lists.
+
+**Example of a meta dict:**
 
 ```python
-# src/cam_info/000000.json
+# src/input/cam_info/000000.json
 {
-    "extrinsicMatrix": [
-        0.007533745,
-        -0.9999714,
-        -0.000616602,
-        -0.004069766,
-        0.01480249,
-        0.0007280733,
-        -0.9998902,
-        -0.07631618,
-        0.9998621,
-        0.00752379,
-        0.01480755,
-        -0.2717806,
-    ],
-    "intrinsicMatrix": [721.5377, 0, 609.5593, 0, 721.5377, 172.854, 0, 0, 1],
+    "deviceId": "CAM_2",
+    "sensorsData": {
+        "extrinsicMatrix": [
+            0.007533745,
+            -0.9999714,
+            -0.000616602,
+            -0.004069766,
+            0.01480249,
+            0.0007280733,
+            -0.9998902,
+            -0.07631618,
+            0.9998621,
+            0.00752379,
+            0.01480755,
+            -0.2717806,
+        ],
+        "intrinsicMatrix": [721.5377, 0, 609.5593, 0, 721.5377, 172.854, 0, 0, 1],
+    }
 }
 ```
+
+#### A full code for uploading and attaching the context image
 
 **Source code:**
 
@@ -181,25 +188,24 @@ The matrices must be **flattened** lists and named like in the example below:
 img_file = "src/input/img/000000.png"
 cam_info_file = "src/input/cam_info/000000.json"
 
-# cam_info contains two matrices needed for projecting points in a 3D space to 2D context photo.
+# 0. Read cam_info with matrices (a meta dict).
 with open(cam_info_file, "r") as f:
     cam_info = json.load(f)
 
-# 1. upload an image. It returns a hash
+# 1. Upload an image to the Supervisely. It generates us a hash for image
 img_hash = api.pointcloud.upload_related_image(img_file)
-# 2. create meta with two matrices
-meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
-# 3. create img_info, it needed to attach the image to the point cloud by its id
-img_info = {"entityId": pcd_info.id, "name": "img_0", "hash": img_hash, "meta": meta}
-# 4. run api command to add the image
+# 2. Create img_info needed for matching the image to the point cloud by its ID
+img_info = {"entityId": pcd_info.id, "name": "img_0", "hash": img_hash, "meta": cam_info}
+# 3. Run the API command to attach the image
 api.pointcloud.add_related_images([img_info])
+
 print("Context image has been uploaded.")
 ```
 
 **Output:**
 
 ```python
-# Context image has been uploaded. {'success': True}
+# Context image has been uploaded.
 ```
 
 <figure><img src="https://user-images.githubusercontent.com/31512713/211832224-a8369237-3e42-4437-9bbb-7b4cb6cda167.png" alt="first-in-labeling-tool-context"><figcaption></figcaption></figure>
@@ -216,7 +222,7 @@ More about calibration and matrix transformations: [OpenCV 3D Camera Calibration
 **Source code:**
 
 ```python
-# Upload batch
+# Upload a batch of point clouds and related images
 paths = ["src/input/pcd/000001.pcd", "src/input/pcd/000002.pcd"]
 img_paths = ["src/input/img/000001.png", "src/input/img/000002.png"]
 cam_paths = ["src/input/cam_info/000001.json", "src/input/cam_info/000002.json"]
@@ -225,11 +231,15 @@ pcd_infos = api.pointcloud.upload_paths(dataset.id, names=["pcd_1", "pcd_2"], pa
 img_hashes = api.pointcloud.upload_related_images(img_paths)
 img_infos = []
 for i, cam_info_file in enumerate(cam_paths):
-    # collecting img_infos
+    # reading cam_info
     with open(cam_info_file, "r") as f:
         cam_info = json.load(f)
-    meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
-    img_info = {"entityId": pcd_infos[i].id, "name": f"img_{i}", "hash": img_hashes[i], "meta": meta}
+    img_info = {
+        "entityId": pcd_infos[i].id,
+        "name": f"img_{i}",
+        "hash": img_hashes[i],
+        "meta": cam_info,
+    }
     img_infos.append(img_info)
 result = api.pointcloud.add_related_images(img_infos)
 print("Batch uploading has finished:", result)
@@ -449,12 +459,10 @@ print(f'Point cloud "{pcd_info.name}" (frame={meta["frame"]}) uploaded to Superv
 **Source code:**
 
 ```python
-# method for reading json cam_info matrices:
-def collect_img_meta(cam_info_file):
+def read_cam_info(cam_info_file):
     with open(cam_info_file, "r") as f:
         cam_info = json.load(f)
-    img_meta = {"deviceId": "CAM_2", "sensorsData": cam_info}
-    return img_meta
+    return cam_info
 
 
 # 1. get paths
@@ -465,14 +473,17 @@ cam_info_files = Path(f"{input_path}/cam_info").glob("*.json")
 
 # 2. get names and metas
 pcd_metas = [{"frame": i} for i in range(len(pcd_files))]
-img_metas = [collect_img_meta(cam_info_file) for cam_info_file in cam_info_files]
+img_metas = [read_cam_info(cam_info_file) for cam_info_file in cam_info_files]
 pcd_names = list(map(os.path.basename, pcd_files))
 img_names = list(map(os.path.basename, img_files))
 
 # 3. upload
 pcd_infos = api.pointcloud_episode.upload_paths(dataset.id, pcd_names, pcd_files, metas=pcd_metas)
 img_hashes = api.pointcloud.upload_related_images(img_files)
-img_infos = [{"entityId": pcd_infos[i].id, "name": img_names[i], "hash": img_hashes[i], "meta": img_metas[i]} for i in range(len(img_hashes))]
+img_infos = [
+    {"entityId": pcd_infos[i].id, "name": img_names[i], "hash": img_hashes[i], "meta": img_metas[i]}
+    for i in range(len(img_hashes))
+]
 api.pointcloud.add_related_images(img_infos)
 
 print("Point Clouds Episode has been uploaded to Supervisely")
