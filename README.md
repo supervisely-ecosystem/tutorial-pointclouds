@@ -407,8 +407,11 @@ print(f"Context image has been successfully downloaded to '{save_path}'")
 
 Working with Point Cloud Episodes is similar, except the following:
 1. There is `api.pointcloud_episode` for working with episodes.
-2. Create a dataset with the type `sly.ProjectType.POINT_CLOUD_EPISODES`.
+2. Create new projects with type `sly.ProjectType.POINT_CLOUD_EPISODES`.
 3. Put the frame index in meta while uploading a pcd: `meta = {"frame": idx}`.
+
+**Note:**
+in Supervisely each episode is treated as a dataset. Therefore, create a separate dataset every time you want to add a new episode.
 
 ### Create new project and dataset
 
