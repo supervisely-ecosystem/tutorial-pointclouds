@@ -21,7 +21,7 @@ workspace_id = sly.env.workspace_id()
 # Create new Supervisely project.
 project = api.project.create(
     workspace_id,
-    "Point Clouds Tutorial",
+    name="Point Clouds Tutorial",
     type=sly.ProjectType.POINT_CLOUDS,
     change_name_if_conflict=True,
 )
@@ -117,7 +117,7 @@ print(f"Context image has been successfully downloaded to '{save_path}'")
 # Create new Supervisely project.
 project = api.project.create(
     workspace_id,
-    "Point Cloud Episodes Tutorial",
+    name="Point Cloud Episodes Tutorial",
     type=sly.ProjectType.POINT_CLOUD_EPISODES,
     change_name_if_conflict=True,
 )

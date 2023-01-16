@@ -78,8 +78,12 @@ Create new project.
 **Source code:**
 
 ```python
-project = api.project.create(workspace_id, name="Point Clouds Tutorial", type=sly.ProjectType.POINT_CLOUDS, change_name_if_conflict=True)
-
+project = api.project.create(
+    workspace_id,
+    name="Point Clouds Tutorial",
+    type=sly.ProjectType.POINT_CLOUDS,
+    change_name_if_conflict=True,
+)
 print(f"Project ID: {project.id}")
 ```
 
@@ -413,7 +417,12 @@ Create new project.
 **Source code:**
 
 ```python
-project = api.project.create(workspace_id, "Point Cloud Episodes Tutorial", type=sly.ProjectType.POINT_CLOUD_EPISODES, change_name_if_conflict=True)
+project = api.project.create(
+    workspace_id,
+    name="Point Cloud Episodes Tutorial",
+    type=sly.ProjectType.POINT_CLOUD_EPISODES,
+    change_name_if_conflict=True,
+)
 print(f"Project ID: {project.id}")
 ```
 
