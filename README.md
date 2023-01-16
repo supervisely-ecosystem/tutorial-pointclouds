@@ -134,8 +134,26 @@ print(f'Point cloud "{pcd_info.name}" uploaded to Supervisely with ID:{pcd_info.
 #### Extrinsic and intrinsic matrices
 
 If you have a photo context taken with a LIDAR image, you can attach the photo to the point cloud.
-To do that, we need two additional matrices. They are taking part in binding coordinates in the point cloud to pixels in the photo.
-In this tutorial we already have them in a json format. For each image we have a one json like this:
+To do that, we need two additional matrices. They are used for matching 3D coordinates in the point cloud to the 2D coordinates in the photo context:
+
+<figure><img src="https://user-images.githubusercontent.com/31512713/212629303-209af3f0-49fc-4a73-9125-233d616cd583.png" alt="matrices_labeled", width="300px"><figcaption></figcaption></figure>
+
+**Parameters meaning**
+
+- **f<sub>x</sub>, f<sub>y</sub>** are the focal lengths expressed in pixel units
+- **c<sub>x</sub>, c<sub>y</sub>** is a principal point that is usually at the image center
+- **r<sub>ij</sub>** and **t<sub>i</sub>** from the `extrinsicMatrix` are the rotation and translation parameters
+
+The dot product of the matrices and XYZ coordinate in 3D space gives us the coordinate of a point (x=u, y=v) in the context photo:
+
+<figure><img src="https://user-images.githubusercontent.com/31512713/212630179-13315291-0e69-4099-a6ae-824da3e4598e.png" alt="dot_product_matrices", width="300px"><figcaption></figcaption></figure>
+
+For further reading about transformations see [OpenCV tutorial](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html).
+
+#### Uploading context photo to the Supervisely.
+For attaching a photo, it is needed to provide the matrices in a `meta` field when adding the related image to the Supervisely.
+The matrices must be flattened (as lists) and named like in the example below:
+
 ```python
 # src/cam_info/000000.json
 {
@@ -156,23 +174,6 @@ In this tutorial we already have them in a json format. For each image we have a
     "intrinsicMatrix": [721.5377, 0, 609.5593, 0, 721.5377, 172.854, 0, 0, 1],
 }
 ```
-The matrices are flattened and correspond to the two below from the [OpenCV 3D calibration tutorial](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html):
-
-![matrices_labeled](https://user-images.githubusercontent.com/31512713/212629303-209af3f0-49fc-4a73-9125-233d616cd583.png)
-
-**What do these parameters mean?**
-
-- **f<sub>x</sub>, f<sub>y</sub>** are the focal lengths expressed in pixel units
-- **c<sub>x</sub>, c<sub>y</sub>** is a principal point that is usually at the image center
-- **r<sub>ij</sub>** and **t<sub>i</sub>** from extrinsicMatrix are the rotation and translation parameters
-
-The dot product of the matrices and XYZ coordinate in 3D space gives us the coordinate of a point (x=u,y=v) in the context photo:
-
-![image](https://user-images.githubusercontent.com/31512713/212630179-13315291-0e69-4099-a6ae-824da3e4598e.png)
-
-For further reading about the transformations see [OpenCV tutorial](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html).
-
-#### Uploading a context photo to the Supervisely.
 
 **Source code:**
 
@@ -203,6 +204,9 @@ print("Context image has been uploaded.")
 ```
 
 <figure><img src="https://user-images.githubusercontent.com/31512713/211832224-a8369237-3e42-4437-9bbb-7b4cb6cda167.png" alt="first-in-labeling-tool-context"><figcaption></figcaption></figure>
+
+For more information about the format of a photo context see [Supervisely annotation JSON format](https://developer.supervise.ly/api-references/supervisely-annotation-json-format/point-clouds#photo-context-image-annotation-file)
+
 
 ### Upload list of point clouds and context images.
 
