@@ -144,15 +144,13 @@ To do that, we need two additional matrices. They are used for matching 3D coord
 - **c<sub>x</sub>, c<sub>y</sub>** is a principal point that is usually at the image center
 - **r<sub>ij</sub>** and **t<sub>i</sub>** from the `extrinsicMatrix` are the rotation and translation parameters
 
-The dot product of the matrices and XYZ coordinate in 3D space gives us the coordinate of a point (x=u, y=v) in the context photo:
+The dot product of the matrices and XYZ coordinate in 3D space gives us the coordinate of a point *(x=u, y=v)* in the photo context:
 
 <figure><img src="https://user-images.githubusercontent.com/31512713/212630179-13315291-0e69-4099-a6ae-824da3e4598e.png" alt="dot_product_matrices", width="300px"><figcaption></figcaption></figure>
 
-For further reading about transformations see [OpenCV tutorial](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html).
-
 #### Uploading context photo to the Supervisely.
 For attaching a photo, it is needed to provide the matrices in a `meta` field when adding the related image to the Supervisely.
-The matrices must be flattened (as lists) and named like in the example below:
+The matrices must be **flattened** lists and named like in the example below:
 
 ```python
 # src/cam_info/000000.json
@@ -205,8 +203,8 @@ print("Context image has been uploaded.")
 
 <figure><img src="https://user-images.githubusercontent.com/31512713/211832224-a8369237-3e42-4437-9bbb-7b4cb6cda167.png" alt="first-in-labeling-tool-context"><figcaption></figcaption></figure>
 
-For more information about the format of a photo context see [Supervisely annotation JSON format](https://developer.supervise.ly/api-references/supervisely-annotation-json-format/point-clouds#photo-context-image-annotation-file)
-
+More about the format of a photo context: [Supervisely annotation JSON format](https://developer.supervise.ly/api-references/supervisely-annotation-json-format/point-clouds#photo-context-image-annotation-file)
+More about calibration and matrix transformations: [OpenCV 3D Camera Calibration Tutorial](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html).
 
 ### Upload list of point clouds and context images.
 
