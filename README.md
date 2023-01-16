@@ -208,7 +208,7 @@ print("Context image has been uploaded.")
 # Context image has been uploaded.
 ```
 
-<figure><img src="https://user-images.githubusercontent.com/31512713/212670009-a9a35f7f-312f-4481-9246-ce9aa35b9bcf.png" alt="first-in-labeling-tool-context"><figcaption></figcaption></figure>
+<figure><img src="https://user-images.githubusercontent.com/31512713/212670489-d9a3660e-9df1-464f-8d72-9f3f99d3ab48.png" alt="first-in-labeling-tool-context"><figcaption></figcaption></figure>
 
 More about the format of a photo context: [Supervisely annotation JSON format](https://developer.supervise.ly/api-references/supervisely-annotation-json-format/point-clouds#photo-context-image-annotation-file)
 
