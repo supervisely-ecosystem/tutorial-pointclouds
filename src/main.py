@@ -11,8 +11,9 @@ from pathlib import Path
 # calib_file = "src/input/calib/000000.txt"
 # label_file = "src/input/label/000000.txt"
 
-load_dotenv("local.env")
-load_dotenv(os.path.expanduser("~/supervisely.env"))
+if sly.is_development():
+    load_dotenv("local.env")
+    load_dotenv(os.path.expanduser("~/supervisely.env"))
 
 api = sly.Api()
 
