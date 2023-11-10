@@ -6,3 +6,5 @@ README_old.md
 __pycache__
 todo.txt
 content
+.DS_Store
+.venv/

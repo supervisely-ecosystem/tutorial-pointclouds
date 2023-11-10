@@ -35,7 +35,7 @@ print(f"Dataset ID: {dataset.id}")
 
 # Upload point cloud to Supervisely platform.
 pcd_file = "src/input/pcd/000000.pcd"
-pcd_info = api.pointcloud.upload_path(dataset.id, name="pcd_0", path=pcd_file)
+pcd_info = api.pointcloud.upload_path(dataset.id, name="pcd_0.pcd", path=pcd_file)
 print(f'Point cloud "{pcd_info.name}" uploaded to Supervisely with ID:{pcd_info.id}')
 
 
@@ -51,7 +51,7 @@ with open(cam_info_file, "r") as f:
 # 1. Upload an image to the Supervisely. It generates us a hash for image
 img_hash = api.pointcloud.upload_related_image(img_file)
 # 2. Create img_info needed for matching the image to the point cloud by its ID
-img_info = {"entityId": pcd_info.id, "name": "img_0", "hash": img_hash, "meta": cam_info}
+img_info = {"entityId": pcd_info.id, "name": "img_0.png", "hash": img_hash, "meta": cam_info}
 # 3. Run the API command to attach the image
 api.pointcloud.add_related_images([img_info])
 
@@ -63,7 +63,7 @@ paths = ["src/input/pcd/000001.pcd", "src/input/pcd/000002.pcd"]
 img_paths = ["src/input/img/000001.png", "src/input/img/000002.png"]
 cam_paths = ["src/input/cam_info/000001.json", "src/input/cam_info/000002.json"]
 
-pcd_infos = api.pointcloud.upload_paths(dataset.id, names=["pcd_1", "pcd_2"], paths=paths)
+pcd_infos = api.pointcloud.upload_paths(dataset.id, names=["pcd_1.pcd", "pcd_2.pcd"], paths=paths)
 img_hashes = api.pointcloud.upload_related_images(img_paths)
 img_infos = []
 for i, cam_info_file in enumerate(cam_paths):
@@ -72,7 +72,7 @@ for i, cam_info_file in enumerate(cam_paths):
         cam_info = json.load(f)
     img_info = {
         "entityId": pcd_infos[i].id,
-        "name": f"img_{i}",
+        "name": f"img_{i}.png",
         "hash": img_hashes[i],
         "meta": cam_info,
     }
@@ -82,7 +82,7 @@ print("Batch uploading has finished:", result)
 
 
 # Get point cloud info by name
-pcd_info = api.pointcloud.get_info_by_name(dataset.id, name="pcd_0")
+pcd_info = api.pointcloud.get_info_by_name(dataset.id, name="pcd_0.pcd")
 print("Get point cloud info:")
 print(pcd_info)
 
